@@ -49,10 +49,10 @@ const toPageResult = <T>(
 export const getPublicNeedsList = async (params: {
   page: number;
   pageSize: number;
-  category?: string;
+  serviceType?: string;
   keyword?: string;
 }) => {
-  const res: any = await request.get("/needs/public", { params });
+  const res: any = await request.get("/api/need/list", { params });
   return toPageResult<NeedItem>(res, params);
 };
 
@@ -63,14 +63,15 @@ export const getPublicNeedsList = async (params: {
 export const getMyPublishedNeeds = async (params: {
   page: number;
   pageSize: number;
+  userId: number;
 }) => {
-  const res: any = await request.get("/needs/my", { params });
+  const res: any = await request.get("/api/need/my", { params });
   return toPageResult<NeedItem>(res, params);
 };
 
 // 获取某个需求的具体响应列表 (用于发布者审核)
 export const getResponsesByNeedId = async (needId: number) => {
-  const res: any = await request.get(`/needs/${needId}/responses`);
+  const res: any = await request.get(`/api/need/${needId}/responses`);
   return res.data as ResponseItem[];
 };
 
@@ -80,14 +81,19 @@ export const auditResponse = async (
   action: "accept" | "reject"
 ) => {
   return request
-    .post(`/needs/responses/${responseId}/audit`, { action })
+    .post(`/api/need/responses/${responseId}/audit`, { action })
     .then((r: any) => r.data);
 };
 
 // 发布/修改需求
 export const publishNeed = (data: any) =>
-  request.post("/needs", data).then((r: any) => r.data);
-
+  request.post("/api/need/publish", data).then((r: any) => r.data);
+// 修改需求
+export const updateNeed = (data: any) =>
+  request.put(`/api/need/${data.id}`, data).then((r: any) => r.data);
+// 删除需求
+export const deleteNeed = (id: number, userId: number) =>
+  request.delete(`/api/need/${id}?userId=${userId}`).then((r: any) => r.data);
 // ==========================================
 // 3. “我服务” API (我是响应者)
 // ==========================================
@@ -96,33 +102,33 @@ export const getMyResponses = async (params?: {
   page?: number;
   pageSize?: number;
 }) => {
-  const res: any = await request.get("/needs/my-responses", { params });
+  const res: any = await request.get("/api/need/my-responses", { params });
   return res.data as any[];
 };
 
 // 提交新的响应
 export const submitResponse = (data: any) =>
-  request.post("/needs/responses", data).then((r: any) => r.data);
+  request.post("/api/need/responses", data).then((r: any) => r.data);
 
 // 修改我的响应 (仅限未接受状态)
 export const updateResponse = (responseIdOrData: number | any, data?: any) => {
   // 支持两种用法：updateResponse(id, data) 或 updateResponse({ id, ...fields })
   if (typeof responseIdOrData === "number") {
     return request
-      .put(`/needs/responses/${responseIdOrData}`, data)
+      .put(`/api/need/responses/${responseIdOrData}`, data)
       .then((r: any) => r.data);
   }
   const payload = responseIdOrData || {};
   const id = payload.id || payload.responseId;
   if (!id) return Promise.reject(new Error("missing response id"));
   return request
-    .put(`/needs/responses/${id}`, payload)
+    .put(`/api/need/responses/${id}`, payload)
     .then((r: any) => r.data);
 };
 
 // 撤销/删除我的响应
 export const deleteResponse = (responseId: number) =>
-  request.delete(`/needs/responses/${responseId}`).then((r: any) => r.data);
+  request.delete(`/api/need/responses/${responseId}`).then((r: any) => r.data);
 
 // ==========================================
 // 4. 通用/系统 API
@@ -133,7 +139,7 @@ export const uploadFile = (file: File) => {
   const fd = new FormData();
   fd.append("file", file);
   return request
-    .post("/needs/upload", fd, {
+    .post("/api/need/upload", fd, {
       headers: { "Content-Type": "multipart/form-data" },
     })
     .then((r: any) => r.data);
@@ -149,7 +155,7 @@ export const getNeedStats = (params: {
   region?: string;
 }) => {
   return request
-    .get("/needs/stats", { params })
+    .get("/api/need/stats", { params })
     .then((r: any) => r.data as StatItem[]);
 };
 
@@ -159,6 +165,6 @@ export const getNeedStats = (params: {
 // 获取单条需求或响应详情
 export const getNeedDetail = async (id: number, type?: "need" | "response") => {
   const params = type ? { type } : undefined;
-  const res: any = await request.get(`/needs/${id}/detail`, { params });
+  const res: any = await request.get(`/api/need/${id}/detail`, { params });
   return res.data as any;
 };

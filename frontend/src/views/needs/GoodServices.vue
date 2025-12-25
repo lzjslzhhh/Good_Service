@@ -4,7 +4,7 @@
       <!-- 筛选区域 -->
       <el-form :inline="true" :model="queryParams" class="filter-form">
         <el-form-item label="服务类型">
-          <el-select v-model="queryParams.category" placeholder="请选择类型" clearable style="width: 180px">
+          <el-select v-model="queryParams.serviceType" placeholder="请选择类型" clearable style="width: 180px">
             <el-option v-for="item in categories" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
@@ -20,17 +20,21 @@
       <!-- 列表区域 -->
       <el-table :data="tableData" border v-loading="loading" stripe style="width: 100%">
         <el-table-column prop="title" label="需求标题" min-width="150" />
-        <el-table-column prop="category" label="服务类型" width="120">
+        <el-table-column prop="serviceType" label="服务类型" width="120">
           <template #default="{ row }">
-            <el-tag effect="plain">{{ row.category }}</el-tag>
+            <el-tag effect="plain">{{ row.serviceType }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="region" label="区域" width="150" />
-        <el-table-column prop="publishTime" label="发布时间" width="120" />
+        <el-table-column prop="regionId" label="区域" width="150" />
+        <el-table-column label="发布时间" width="120">
+          <template #default="{ row }">
+            {{ formatDate(row.createTime) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'Pending' ? 'warning' : 'success'">
-              {{ row.status === 'Pending' ? '待响应' : '已响应' }}
+            <el-tag :type="row.status === '0' ? 'warning' : 'success'">
+              {{ row.status === '1' ? '已取消' : '已发布' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -63,10 +67,15 @@ const total = ref(0)
 const queryParams = reactive({
   page: 1,
   pageSize: 10,
-  category: '',
+  serviceType: '',
   keyword: ''
 })
-
+// 添加日期格式化函数
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+};
 const fetchData = async () => {
   loading.value = true
   try {
@@ -84,7 +93,7 @@ const handleSearch = () => {
 }
 
 const resetQuery = () => {
-  queryParams.category = ''
+  queryParams.serviceType = ''
   queryParams.keyword = ''
   handleSearch()
 }

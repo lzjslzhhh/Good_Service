@@ -59,7 +59,7 @@ const userStore = useUserStore();
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 
-const form = reactive({ username: "admi", password: "123" }); // 默认填好方便测试
+const form = reactive({ username: "lz", password: "Lz1234" }); // 默认填好方便测试
 
 const rules = {
   username: [{ required: true, message: "请输入用户名", trigger: "blur" }],

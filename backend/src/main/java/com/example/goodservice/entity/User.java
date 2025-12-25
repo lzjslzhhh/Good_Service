@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
@@ -17,11 +17,9 @@ public class User {
     private String username;
     private String password;
     private Integer userType;    // 0-普通用户, 1-服务者, etc.
-    private String phone;
     private String realName;
+    private String phone;
     private String profile;      // 个人简介
-    private String nickname;
-    private String email;
 
     private LocalDateTime registerTime;
     private LocalDateTime updateTime;

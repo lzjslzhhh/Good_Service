@@ -7,19 +7,17 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "need")
-public class Need {
-
+@Table(name = "response")
+public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long responseId;
     private Long needId;
     private Long userId;          // 发布者
-    private Long regionId;
-    private String serviceType;
-    private String title;         // 需求标题
-    private String description;   // 需求描述
-    private Integer status;       // 0-已发布 -1-已取消
-
+    private String content;   // 需求描述
+    private String imageUrl;
+    private Integer status;       // 0-待接受 1-同意 2-拒绝 3-取消
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+
 }

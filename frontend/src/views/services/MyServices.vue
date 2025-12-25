@@ -6,7 +6,7 @@
       <el-tab-pane label="好服务大厅 (我要接单)" name="market">
         <!-- 筛选栏 -->
         <div class="filter-bar">
-          <el-select v-model="marketQuery.category" placeholder="按服务类型筛选" clearable style="width: 180px; margin-right: 10px">
+          <el-select v-model="marketQuery.serviceType" placeholder="按服务类型筛选" clearable style="width: 180px; margin-right: 10px">
             <el-option v-for="c in categories" :key="c" :label="c" :value="c" />
           </el-select>
           <el-input v-model="marketQuery.keyword" placeholder="关键词搜索" style="width: 200px; margin-right: 10px" clearable />
@@ -16,25 +16,33 @@
         <!-- 市场列表 -->
         <el-table :data="marketList" border stripe v-loading="loading" style="margin-top: 15px">
           <el-table-column prop="title" label="需求标题" min-width="150" show-overflow-tooltip />
-          <el-table-column prop="category" label="类型" width="120">
+          <el-table-column prop="serviceType" label="类型" width="120">
              <template #default="{ row }">
-               <el-tag effect="plain">{{ row.category }}</el-tag>
+               <el-tag effect="plain">{{ row.serviceType }}</el-tag>
              </template>
           </el-table-column>
-          <el-table-column prop="region" label="区域" width="150" />
+          <el-table-column prop="regionId" label="区域" width="150" />
           <el-table-column prop="description" label="需求描述" show-overflow-tooltip />
           <el-table-column label="操作" width="140" fixed="right">
             <template #default="{ row }">
               <!-- 如果API返回 hasMyResponse=true，则禁用按钮 -->
-              <el-button 
-                v-if="!row.hasMyResponse" 
-                type="primary" 
-                size="small" 
-                @click="openRespondDialog(row)"
-              >
-                立即响应
-              </el-button>
-              <el-tag v-else type="success">我已参与</el-tag>
+
+              <el-tag v-if="row.userId === currentUserId" type="info" size="small">
+                  我的需求
+                </el-tag>
+                <!-- 如果已经响应过，显示已参与 -->
+                <el-tag v-else-if="row.hasMyResponse" type="success" size="small">
+                  我已参与
+                </el-tag>
+                <!-- 否则显示响应按钮 -->
+                <el-button 
+                  v-else
+                  type="primary" 
+                  size="small" 
+                  @click="openRespondDialog(row)"
+                >
+                  立即响应
+                </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -53,14 +61,12 @@
       <!-- Tab 2: 我的响应管理 -->
       <el-tab-pane label="我的响应记录" name="my-responses">
         <div style="margin-bottom: 10px;">
-           <el-button icon="Refresh" circle @click="loadMyResponses" />
            <span style="margin-left: 10px; font-size: 12px; color: #999;">仅“已提交”且未被接受的响应可修改或撤销</span>
         </div>
         
         <el-table :data="myResponses" border v-loading="loading">
           <el-table-column prop="needTitle" label="关联的需求" min-width="150" />
           <el-table-column prop="serviceContent" label="我的服务方案" show-overflow-tooltip />
-          <el-table-column prop="price" label="报价(元)" width="100" />
           <el-table-column label="附件" width="100">
             <template #default="{ row }">
               <el-popover placement="top" trigger="hover" v-if="row.mediaFiles && row.mediaFiles.length">
@@ -75,14 +81,14 @@
           <el-table-column prop="status" label="当前状态" width="120">
             <template #default="{ row }">
                <el-tag :type="getStatusType(row.status)">
-                 {{ row.status === 'Submitted' ? '待审核' : (row.status === 'Accepted' ? '已接受' : '已拒绝') }}
-               </el-tag>
+                  {{ mapStatus(row.status) }}
+                </el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="180">
             <template #default="{ row }">
               <!-- 只有 Submitted 状态（未被发布者处理）才能修改删除 -->
-              <div v-if="row.status === 'Submitted'">
+              <div v-if="row.status === 0">
                 <el-button size="small" type="primary" link @click="openEditDialog(row)">修改</el-button>
                 <el-button size="small" type="danger" link @click="handleDeleteResp(row)">撤销</el-button>
               </div>
@@ -106,11 +112,6 @@
           <el-input type="textarea" v-model="form.content" rows="4" placeholder="请描述您的服务内容、优势、上门时间等..." />
         </el-form-item>
         
-        <el-form-item label="预估报价" prop="price" :rules="[{ required: true, message: '请输入报价' }]">
-          <el-input-number v-model="form.price" :min="0" :step="10" />
-          <span style="margin-left: 10px">元</span>
-        </el-form-item>
-
         <el-form-item label="附件上传">
           <!-- 模拟上传 -->
           <el-upload
@@ -122,7 +123,7 @@
           >
             <el-button type="primary" size="small">点击上传图片/视频</el-button>
             <template #tip>
-              <div class="el-upload__tip">支持 jpg/png/mp4 文件，模拟上传</div>
+              <div class="el-upload__tip">支持 jpg/png/mp4 文件</div>
             </template>
           </el-upload>
         </el-form-item>
@@ -136,11 +137,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { getPublicNeedsList, submitResponse, getMyResponses, updateResponse, deleteResponse, uploadFile } from '@/api/service'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue' // 需要图标
+// 导入用户store
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore()
+const currentUserId = computed(() => userStore.user?.id)
 const categories = ['管道维修', '助老服务', '保洁服务', '就诊服务', '营养餐服务', '定期接送服务', '其他']
 
 // 状态
@@ -151,15 +156,23 @@ const marketTotal = ref(0)
 const myResponses = ref<any[]>([])
 
 // 查询参数
-const marketQuery = reactive({ page: 1, pageSize: 10, category: '', keyword: '' })
+const marketQuery = reactive({ page: 1, pageSize: 10, serviceType: '', keyword: '' })
 
 // 弹窗相关
 const dialogVisible = ref(false)
 const dialogType = ref<'add' | 'edit'>('add')
 const selectedNeedTitle = ref('')
-const form = reactive({ id: 0, needId: 0, content: '', price: 0, mediaFiles: [] as string[] })
+const form = reactive({ id: 0, needId: 0, content: '', price: 0, mediaFiles: [] as string[], userId: 0 })
 const fileList = ref<any[]>([]) // 用于 el-upload 显示
-
+// 在 MyServices.vue 中添加状态映射方法
+const mapStatus = (statusCode: number) => {
+  switch(statusCode) {
+    case 0: return '待接受';
+    case 1: return '同意';
+    case 2: return '拒绝';
+    default: return '取消';
+  }
+}
 // ================= 逻辑方法 =================
 
 // 1. 加载市场需求
@@ -178,7 +191,7 @@ const loadMarket = async () => {
 const loadMyResponses = async () => {
   loading.value = true
   try {
-    myResponses.value = await getMyResponses()
+    myResponses.value = await getMyResponses({ responderId: currentUserId.value })
   } finally {
     loading.value = false
   }
@@ -192,16 +205,19 @@ const handleTabChange = (name: string) => {
 
 // 4. 打开响应弹窗 (新增)
 const openRespondDialog = (row: any) => {
+  if (row.userId === currentUserId.value) {
+    ElMessage.warning('不能响应自己发布的需求')
+    return
+  }
   dialogType.value = 'add'
   selectedNeedTitle.value = row.title
   // 重置表单
   form.id = 0
-  form.needId = row.id
+  form.needId = row.needId
   form.content = ''
-  form.price = 0
   form.mediaFiles = []
   fileList.value = []
-  
+  form.userId = currentUserId.value // 添加用户ID
   dialogVisible.value = true
 }
 
@@ -212,10 +228,7 @@ const openEditDialog = (row: any) => {
   form.needId = row.needId
   form.content = row.serviceContent
   form.price = row.price
-  // 恢复文件列表
-  form.mediaFiles = row.mediaFiles || []
-  fileList.value = form.mediaFiles.map((f: string) => ({ name: f, url: f }))
-  
+
   dialogVisible.value = true
 }
 
@@ -236,7 +249,7 @@ const handleRemoveFile = (uploadFile: any) => {
 
 // 7. 提交表单
 const handleSubmit = async () => {
-  if (!form.content || !form.price) {
+  if (!form.content ) {
     ElMessage.warning('请填写完整信息')
     return
   }

@@ -2,16 +2,55 @@ import request from "@/utils/request";
 import type { User } from "@/types";
 
 export const login = (payload: { username: string; password: string }) => {
-  return request.post("http://localhost:8080/auth/login", payload).then((r: any) => r.data as User);
+  return request.post("/api/auth/login", payload).then((r: any) => {
+    // 处理字段映射
+    const userData = r.data;
+    return {
+      id: userData.id,
+      username: userData.username,
+      phone: userData.phone,
+      profile: userData.profile,
+      role: userData.userType === 1 ? 'admin' : 'user', // 映射userType到role
+      token: userData.token
+    } as User;
+  });
 };
 
 export const register = (payload: {
   username: string;
+  profile?: string;
   password: string;
-  phone?: string;
 }) => {
-  return request.post("/auth/register", payload).then((r: any) => r.data);
+  return request.post("/api/auth/register", payload).then((r: any) => r.data);
 };
 
-export const getProfile = () =>
-  request.get("/admin/me").then((r: any) => r.data as User);
+// 获取当前登录用户的详细信息
+export const getCurrentUser = () => {
+  return request.get("/api/auth/profile").then((r: any) => {
+    const userData = r.data;
+    return {
+      id: userData.id,
+      username: userData.username,
+      phone: userData.phone,
+      intro: userData.profile, // 后端profile字段对应前端intro
+      role: userData.userType === 1 ? 'admin' : 'user',
+      token: userData.token
+    } as User;
+  });
+};
+
+// 更新当前用户信息
+export const updateProfile = (payload: {
+  phone?: string;
+  profile?: string;
+  password?: string;
+}) => {
+  // 将前端的intro字段映射到后端的profile字段
+  const requestData = {
+    phone: payload.phone,
+    profile: payload.profile, // 字段映射
+    password: payload.password
+  };
+  
+  return request.put("/api/auth/profile", requestData).then((r: any) => r.data);
+};

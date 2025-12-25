@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
-public interface NeedRepository extends JpaRepository<Need, Long> {
+public interface NeedRepository extends JpaRepository<Need, Long>, JpaSpecificationExecutor<Need> {
 
     List<Need> findByUserId(Long userId);
 

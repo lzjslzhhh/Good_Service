@@ -23,6 +23,7 @@ export interface NeedItem {
   mediaFiles?: string[]; // 模拟上传的图片/视频文件名
   region: string;
   status: NeedStatus;
+  userId: number; // 添加发布者ID字段
   publishTime: string;
   publisherId: number;
   responseCount: number; // 收到多少个响应
@@ -52,7 +53,7 @@ export interface User {
   id: number;
   username: string;
   phone?: string;
-  intro?: string;
+  profile?: string;
   role: Role; // 核心字段
   token?: string;
 }

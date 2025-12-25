@@ -55,7 +55,7 @@
           <el-descriptions-item label="用户名">{{ currentUser.username }}</el-descriptions-item>
           <el-descriptions-item label="角色">{{ currentUser.role }}</el-descriptions-item>
           <el-descriptions-item label="电话">{{ currentUser.phone }}</el-descriptions-item>
-          <el-descriptions-item label="简介">{{ currentUser.intro }}</el-descriptions-item>
+          <el-descriptions-item label="简介">{{ currentUser.profile }}</el-descriptions-item>
         </el-descriptions>
         <template #footer>
           <el-button @click="dialogVisible = false">关闭</el-button>

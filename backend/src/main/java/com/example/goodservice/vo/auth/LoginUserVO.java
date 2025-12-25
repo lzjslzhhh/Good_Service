@@ -5,7 +5,15 @@ public class LoginUserVO {
     private Long id;
     private String username;
     private Integer userType;    // 0-普通用户, 1-服务者, etc.
+    private String phone;
+    private String profile;
     private String token;
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getProfile() { return profile; }
+    public void setProfile(String profile) { this.profile = profile; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

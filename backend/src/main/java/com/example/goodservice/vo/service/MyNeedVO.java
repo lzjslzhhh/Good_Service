@@ -1,10 +1,18 @@
 package com.example.goodservice.vo.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class MyNeedVO {
-    private Long id;
+    private Long needId;
+    private Long userId;
+    private Long regionId;
+    private String region;
     private String title;
-    private String category;
-    private String status;         // Pending / Responded
-    private Integer responseCount; // 响应数量
+    private String serviceType;
+    private String description;
+    private Integer status;         // Pending / Responded
+    private Long responseCount; // 响应数量
     // getter / setter
 }
