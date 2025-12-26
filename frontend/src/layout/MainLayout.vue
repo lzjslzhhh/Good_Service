@@ -5,7 +5,9 @@
       <!-- Logo 区域 -->
       <div class="logo">
         <el-icon class="logo-icon"><Platform /></el-icon>
-        <span class="logo-text">{{ userStore.isAdmin() ? '"好服务"后台管理' : '"好服务"用户平台' }}</span>
+        <span class="logo-text">{{
+          userStore.isAdmin() ? '"好服务"后台管理' : '"好服务"用户平台'
+        }}</span>
       </div>
 
       <el-menu
@@ -40,15 +42,10 @@
             <el-icon><List /></el-icon>
             <span>我需要 (发布管理)</span>
           </el-menu-item>
-          
+
           <el-menu-item index="/my-services">
             <el-icon><Service /></el-icon>
             <span>我服务 (响应管理)</span>
-          </el-menu-item>
-
-          <el-menu-item index="/stats">
-            <el-icon><TrendCharts /></el-icon>
-            <span>统计分析</span>
           </el-menu-item>
         </template>
 
@@ -57,7 +54,7 @@
           <el-icon><User /></el-icon>
           <span>个人信息修改</span>
         </el-menu-item>
-        
+
         <el-menu-item index="/user-detail">
           <el-icon><InfoFilled /></el-icon>
           <span>用户详情</span>
@@ -72,30 +69,41 @@
         <!-- 左侧：面包屑导航 -->
         <div class="header-left">
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/good-services' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/good-services' }"
+              >首页</el-breadcrumb-item
+            >
             <el-breadcrumb-item>{{ routeName }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
 
         <!-- 右侧：用户信息 + 头像下拉 -->
         <div class="header-right">
-          <el-avatar 
-            :size="32" 
+          <el-avatar
+            :size="32"
             class="user-avatar"
-            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" 
+            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
           />
           <el-dropdown trigger="click" @command="handleCommand">
             <span class="el-dropdown-link">
-              {{ userStore.user?.username || '用户' }}
+              {{ userStore.user?.username || "用户" }}
               <el-icon class="el-icon--right"><arrow-down /></el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="user-detail">个人中心</el-dropdown-item>
+                <el-dropdown-item command="user-detail"
+                  >个人中心</el-dropdown-item
+                >
                 <el-dropdown-item command="role" disabled>
-                  当前角色：{{ userStore.user?.role === 'admin' ? '管理员' : '普通用户' }}
+                  当前角色：{{
+                    userStore.user?.role === "admin" ? "管理员" : "普通用户"
+                  }}
                 </el-dropdown-item>
-                <el-dropdown-item divided command="logout" style="color: #f56c6c;">退出登录</el-dropdown-item>
+                <el-dropdown-item
+                  divided
+                  command="logout"
+                  style="color: #f56c6c"
+                  >退出登录</el-dropdown-item
+                >
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -110,57 +118,63 @@
           </transition>
         </router-view>
       </el-main>
-      
+
       <!-- 底部版权 -->
-      <el-footer class="footer">
-        © 2025  "好服务"平台系统
-      </el-footer>
+      <el-footer class="footer"> © 2025 "好服务"平台系统 </el-footer>
     </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { useRouter, useRoute } from 'vue-router'
-import { 
-  List, Service, User, TrendCharts, Search, Platform, UserFilled, ArrowDown, InfoFilled 
-} from '@element-plus/icons-vue'
+import { computed } from "vue";
+import { useUserStore } from "@/stores/user";
+import { useRouter, useRoute } from "vue-router";
+import {
+  List,
+  Service,
+  User,
+  TrendCharts,
+  Search,
+  Platform,
+  UserFilled,
+  ArrowDown,
+  InfoFilled,
+} from "@element-plus/icons-vue";
 
-const userStore = useUserStore()
-const router = useRouter()
-const route = useRoute()
+const userStore = useUserStore();
+const router = useRouter();
+const route = useRoute();
 
 // 动态计算面包屑名称
 const routeName = computed(() => {
   const map: Record<string, string> = {
-    'good-services': '好服务 (需求查询)',
-    'my-needs': '我需要 (发布管理)',
-    'my-services': '我服务 (响应管理)',
-    'stats': '统计分析', // 普通用户的统计
-    'profile': '个人信息修改',
-    'user-detail': '用户详情',
-    'admin-stats': '统计分析', // 管理员的统计
-    'admin-users': '用户管理'
-  }
+    "good-services": "好服务 (需求查询)",
+    "my-needs": "我需要 (发布管理)",
+    "my-services": "我服务 (响应管理)",
+    stats: "统计分析", // 普通用户的统计
+    profile: "个人信息修改",
+    "user-detail": "用户详情",
+    "admin-stats": "统计分析", // 管理员的统计
+    "admin-users": "用户管理",
+  };
   // 取路径最后一段作为 key
-  const pathKey = route.path.split('/').pop() || ''
+  const pathKey = route.path.split("/").pop() || "";
   // 处理 admin/stats 这种情况
-  if (route.path.includes('admin/stats')) return '运营统计'
-  if (route.path.includes('admin/users')) return '用户管理'
-  
-  return map[pathKey] || '当前页面'
-})
+  if (route.path.includes("admin/stats")) return "运营统计";
+  if (route.path.includes("admin/users")) return "用户管理";
+
+  return map[pathKey] || "当前页面";
+});
 
 // 下拉菜单处理
 const handleCommand = (command: string) => {
-  if (command === 'logout') {
-    userStore.logout()
-    router.push('/login')
-  } else if (command === 'user-detail') {
-    router.push('/user-detail')
+  if (command === "logout") {
+    userStore.logout();
+    router.push("/login");
+  } else if (command === "user-detail") {
+    router.push("/user-detail");
   }
-}
+};
 </script>
 
 <style scoped>
@@ -197,7 +211,7 @@ const handleCommand = (command: string) => {
 .logo-icon {
   font-size: 24px;
   margin-right: 10px;
-  color: #409EFF;
+  color: #409eff;
 }
 
 .el-menu-vertical {

@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
     <el-card header="用户管理">
-      <!-- 搜索栏 -->
       <div class="filter-bar">
         <el-input
           v-model="queryParams.keyword"
@@ -13,7 +12,6 @@
         <el-button type="primary" @click="handleSearch">查询</el-button>
       </div>
 
-      <!-- 表格 -->
       <el-table :data="tableData" border stripe v-loading="loading" style="margin-top: 20px">
         <el-table-column prop="id" label="用户ID" width="80" />
         <el-table-column prop="username" label="用户名" width="150" />
@@ -26,15 +24,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="intro" label="个人简介" show-overflow-tooltip />
-        <!-- 选作功能：点击查看详情 -->
         <el-table-column label="操作" width="120">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="handleViewDetail(row)">查看详情</el-button>
           </template>
         </el-table-column>
       </el-table>
-
-      <!-- 分页 -->
       <div class="pagination-container" style="margin-top: 20px; display: flex; justify-content: center;">
         <el-pagination
           background
@@ -44,8 +39,6 @@
           @current-change="handlePageChange"
         />
       </div>
-
-      <!-- 用户详情弹窗 -->
       <el-dialog v-model="dialogVisible" title="用户详细信息" width="500px">
         <el-descriptions border :column="1">
           <el-descriptions-item label="头像">

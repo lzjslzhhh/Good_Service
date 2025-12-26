@@ -14,5 +14,4 @@ public class MyNeedVO {
     private String description;
     private Integer status;         // Pending / Responded
     private Long responseCount; // 响应数量
-    // getter / setter
 }

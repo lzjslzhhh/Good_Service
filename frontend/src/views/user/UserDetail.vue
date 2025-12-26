@@ -15,15 +15,6 @@
           {{ userInfo.profile || '这个人很懒，什么都没有留下。' }}
         </el-descriptions-item>
       </el-descriptions>
-
-      <!-- <el-row :gutter="20" style="margin-top: 20px;">
-        <el-col :span="12">
-           <el-statistic title="累计发布需求" :value="12" />
-        </el-col>
-        <el-col :span="12">
-           <el-statistic title="累计服务次数" :value="5" />
-        </el-col>
-      </el-row> -->
     </el-card>
   </div>
 </template>
@@ -33,7 +24,7 @@ import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
-// 实际场景可能是获取 URL 这里的 ID，这里简单展示当前登录用户
+
 const userInfo = ref({
   ...userStore.user
 })

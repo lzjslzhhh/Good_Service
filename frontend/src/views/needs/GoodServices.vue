@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
     <el-card header="好服务 - 需求大厅">
-      <!-- 筛选区域 -->
       <el-form :inline="true" :model="queryParams" class="filter-form">
         <el-form-item label="服务类型">
           <el-select v-model="queryParams.serviceType" placeholder="请选择类型" clearable style="width: 180px">
@@ -16,8 +15,6 @@
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
-
-      <!-- 列表区域 -->
       <el-table :data="tableData" border v-loading="loading" stripe style="width: 100%">
         <el-table-column prop="title" label="需求标题" min-width="150" />
         <el-table-column prop="serviceType" label="服务类型" width="120">
@@ -39,8 +36,6 @@
           </template>
         </el-table-column>
       </el-table>
-
-      <!-- 分页 -->
       <div class="pagination-container">
         <el-pagination
           background

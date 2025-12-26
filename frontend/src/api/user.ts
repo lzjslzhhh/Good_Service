@@ -24,7 +24,7 @@ export const register = (payload: {
   return request.post("/api/auth/register", payload).then((r: any) => r.data);
 };
 
-// 获取当前登录用户的详细信息
+
 export const getCurrentUser = () => {
   return request.get("/api/auth/profile").then((r: any) => {
     const userData = r.data;
@@ -39,16 +39,16 @@ export const getCurrentUser = () => {
   });
 };
 
-// 更新当前用户信息
+
 export const updateProfile = (payload: {
   phone?: string;
   profile?: string;
   password?: string;
 }) => {
-  // 将前端的intro字段映射到后端的profile字段
+
   const requestData = {
     phone: payload.phone,
-    profile: payload.profile, // 字段映射
+    profile: payload.profile, 
     password: payload.password
   };
   

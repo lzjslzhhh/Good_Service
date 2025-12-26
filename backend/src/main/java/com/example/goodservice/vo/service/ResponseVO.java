@@ -2,8 +2,6 @@ package com.example.goodservice.vo.service;
 
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter @Setter
 public class ResponseVO {
@@ -13,7 +11,5 @@ public class ResponseVO {
     private String responderName;
     private String responderIntro;
     private String serviceContent;
-    private Double price;
-    private Long status; // Submitted / Accepted / Rejected
-    // getter / setter
+    private Integer status; // Submitted / Accepted / Rejected
 }

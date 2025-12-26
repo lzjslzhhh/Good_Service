@@ -1,8 +1,14 @@
 package com.example.goodservice.controller.admin;
 
+import com.example.goodservice.common.PageResult;
 import com.example.goodservice.common.Result;
 import com.example.goodservice.entity.User;
 import com.example.goodservice.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import com.example.goodservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +21,30 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
+    @Autowired
+    private UserRepository userRepository ;
     /**
      * 查询所有用户（管理员）
      */
     @GetMapping("/list")
-    public Result<List<User>> listUsers() {
-        List<User> users = userService.listAllUsers();
-        // 不返回密码
-        users.forEach(u -> u.setPassword(null));
-        return Result.success(users);
+    public Result<PageResult<User>> getUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String keyword) {
+
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), pageSize, Sort.by("id").ascending());
+        Page<User> p;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            p = userRepository.findAll(pageable);
+        } else {
+            p = userRepository.findByUsernameContainingOrPhoneContaining(keyword, keyword, pageable);
+        }
+
+        List<User> list = p.getContent();
+        list.forEach(u -> u.setPassword(null));
+        PageResult<User> result = new PageResult<>(list, p.getTotalElements(), page, pageSize);
+        return Result.success(result);
     }
 
     /**

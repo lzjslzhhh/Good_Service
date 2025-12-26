@@ -1,10 +1,7 @@
 <template>
   <div class="app-container">
     <el-tabs v-model="activeTab" type="border-card" @tab-change="handleTabChange">
-      
-      <!-- Tab 1: 服务大厅 (浏览需求并响应) -->
       <el-tab-pane label="好服务大厅 (我要接单)" name="market">
-        <!-- 筛选栏 -->
         <div class="filter-bar">
           <el-select v-model="marketQuery.serviceType" placeholder="按服务类型筛选" clearable style="width: 180px; margin-right: 10px">
             <el-option v-for="c in categories" :key="c" :label="c" :value="c" />
@@ -12,8 +9,6 @@
           <el-input v-model="marketQuery.keyword" placeholder="关键词搜索" style="width: 200px; margin-right: 10px" clearable />
           <el-button type="primary" @click="loadMarket">查询</el-button>
         </div>
-
-        <!-- 市场列表 -->
         <el-table :data="marketList" border stripe v-loading="loading" style="margin-top: 15px">
           <el-table-column prop="title" label="需求标题" min-width="150" show-overflow-tooltip />
           <el-table-column prop="serviceType" label="类型" width="120">
@@ -25,16 +20,12 @@
           <el-table-column prop="description" label="需求描述" show-overflow-tooltip />
           <el-table-column label="操作" width="140" fixed="right">
             <template #default="{ row }">
-              <!-- 如果API返回 hasMyResponse=true，则禁用按钮 -->
-
               <el-tag v-if="row.userId === currentUserId" type="info" size="small">
                   我的需求
                 </el-tag>
-                <!-- 如果已经响应过，显示已参与 -->
                 <el-tag v-else-if="row.hasMyResponse" type="success" size="small">
                   我已参与
                 </el-tag>
-                <!-- 否则显示响应按钮 -->
                 <el-button 
                   v-else
                   type="primary" 
@@ -46,8 +37,6 @@
             </template>
           </el-table-column>
         </el-table>
-        
-        <!-- 分页 -->
         <div style="margin-top: 20px; display: flex; justify-content: center;">
           <el-pagination 
             background layout="prev, pager, next" 
@@ -57,8 +46,6 @@
           />
         </div>
       </el-tab-pane>
-
-      <!-- Tab 2: 我的响应管理 -->
       <el-tab-pane label="我的响应记录" name="my-responses">
         <div style="margin-bottom: 10px;">
            <span style="margin-left: 10px; font-size: 12px; color: #999;">仅“已提交”且未被接受的响应可修改或撤销</span>
@@ -87,7 +74,6 @@
           </el-table-column>
           <el-table-column label="操作" width="180">
             <template #default="{ row }">
-              <!-- 只有 Submitted 状态（未被发布者处理）才能修改删除 -->
               <div v-if="row.status === 0">
                 <el-button size="small" type="primary" link @click="openEditDialog(row)">修改</el-button>
                 <el-button size="small" type="danger" link @click="handleDeleteResp(row)">撤销</el-button>
@@ -100,8 +86,6 @@
         </el-table>
       </el-tab-pane>
     </el-tabs>
-
-    <!-- 通用响应表单弹窗 (新增/修改) -->
     <el-dialog v-model="dialogVisible" :title="dialogType === 'add' ? '提交服务响应' : '修改响应信息'" width="600px">
       <el-form :model="form" ref="formRef" label-width="100px">
         <el-form-item label="关联需求" v-if="dialogType === 'add'">
@@ -113,7 +97,6 @@
         </el-form-item>
         
         <el-form-item label="附件上传">
-          <!-- 模拟上传 -->
           <el-upload
             action="#"
             :http-request="customUpload"
@@ -141,30 +124,30 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { getPublicNeedsList, submitResponse, getMyResponses, updateResponse, deleteResponse, uploadFile } from '@/api/service'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue' // 需要图标
-// 导入用户store
+
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 const currentUserId = computed(() => userStore.user?.id)
 const categories = ['管道维修', '助老服务', '保洁服务', '就诊服务', '营养餐服务', '定期接送服务', '其他']
 
-// 状态
+
 const activeTab = ref('market')
 const loading = ref(false)
 const marketList = ref<any[]>([])
 const marketTotal = ref(0)
 const myResponses = ref<any[]>([])
 
-// 查询参数
+
 const marketQuery = reactive({ page: 1, pageSize: 10, serviceType: '', keyword: '' })
 
-// 弹窗相关
+
 const dialogVisible = ref(false)
 const dialogType = ref<'add' | 'edit'>('add')
 const selectedNeedTitle = ref('')
 const form = reactive({ id: 0, needId: 0, content: '', price: 0, mediaFiles: [] as string[], userId: 0 })
 const fileList = ref<any[]>([]) // 用于 el-upload 显示
-// 在 MyServices.vue 中添加状态映射方法
+
 const mapStatus = (statusCode: number) => {
   switch(statusCode) {
     case 0: return '待接受';
@@ -173,9 +156,7 @@ const mapStatus = (statusCode: number) => {
     default: return '取消';
   }
 }
-// ================= 逻辑方法 =================
 
-// 1. 加载市场需求
 const loadMarket = async () => {
   loading.value = true
   try {
@@ -187,7 +168,7 @@ const loadMarket = async () => {
   }
 }
 
-// 2. 加载我的响应
+
 const loadMyResponses = async () => {
   loading.value = true
   try {
@@ -197,13 +178,13 @@ const loadMyResponses = async () => {
   }
 }
 
-// 3. Tab 切换
+
 const handleTabChange = (name: string) => {
   if (name === 'market') loadMarket()
   else loadMyResponses()
 }
 
-// 4. 打开响应弹窗 (新增)
+
 const openRespondDialog = (row: any) => {
   if (row.userId === currentUserId.value) {
     ElMessage.warning('不能响应自己发布的需求')
@@ -211,17 +192,16 @@ const openRespondDialog = (row: any) => {
   }
   dialogType.value = 'add'
   selectedNeedTitle.value = row.title
-  // 重置表单
   form.id = 0
   form.needId = row.needId
   form.content = ''
   form.mediaFiles = []
   fileList.value = []
-  form.userId = currentUserId.value // 添加用户ID
+  form.userId = currentUserId.value 
   dialogVisible.value = true
 }
 
-// 5. 打开修改弹窗
+
 const openEditDialog = (row: any) => {
   dialogType.value = 'edit'
   form.id = row.id
@@ -232,14 +212,14 @@ const openEditDialog = (row: any) => {
   dialogVisible.value = true
 }
 
-// 6. 文件上传逻辑 (Mock)
+
 const customUpload = (options: any) => {
   const { file } = options
-  // 调用 API 模拟上传
+
   uploadFile(file).then((res: any) => {
     form.mediaFiles.push(res.name) // 存文件名
     ElMessage.success(`文件 ${file.name} 上传成功`)
-    // 这里不调用 options.onSuccess 因为我们手动管理了 fileList
+
   })
 }
 const handleRemoveFile = (uploadFile: any) => {
@@ -247,7 +227,7 @@ const handleRemoveFile = (uploadFile: any) => {
   form.mediaFiles = form.mediaFiles.filter(f => f !== name)
 }
 
-// 7. 提交表单
+
 const handleSubmit = async () => {
   if (!form.content ) {
     ElMessage.warning('请填写完整信息')
@@ -263,12 +243,12 @@ const handleSubmit = async () => {
   }
   
   dialogVisible.value = false
-  // 刷新数据
-  if (activeTab.value === 'market') loadMarket() // 刷新为了更新 hasMyResponse 状态
+
+  if (activeTab.value === 'market') loadMarket() 
   loadMyResponses()
 }
 
-// 8. 撤销响应
+
 const handleDeleteResp = (row: any) => {
   ElMessageBox.confirm('确定要撤销这条服务响应吗？', '提示', { type: 'warning' })
     .then(async () => {
@@ -279,13 +259,13 @@ const handleDeleteResp = (row: any) => {
     .catch(() => {})
 }
 
-// 分页
+
 const handlePageChange = (page: number) => {
   marketQuery.page = page
   loadMarket()
 }
 
-// 状态颜色辅助
+
 const getStatusType = (status: string) => {
   if (status === 'Accepted') return 'success'
   if (status === 'Rejected') return 'danger'

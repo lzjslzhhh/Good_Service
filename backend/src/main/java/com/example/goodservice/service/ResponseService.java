@@ -5,6 +5,7 @@ import com.example.goodservice.entity.Need;
 import com.example.goodservice.entity.Response;
 import com.example.goodservice.repository.NeedRepository;
 import com.example.goodservice.repository.ResponseRepository;
+import com.example.goodservice.repository.UserRepository;
 import com.example.goodservice.vo.service.ResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class ResponseService {
             if (need != null) {
                 vo.setNeedTitle(need.getTitle());
                 vo.setServiceContent(response.getContent());
-                vo.setStatus(Long.valueOf(response.getStatus()));
+                vo.setStatus(response.getStatus());
             }
 
             // 映射其他字段...
@@ -68,9 +69,31 @@ public class ResponseService {
         response.setUpdateTime(LocalDateTime.now());
         return responseRepository.save(response);
     }
+    @Autowired
+    private UserRepository userRepository;
+    public List<com.example.goodservice.vo.service.ResponseVO> getResponsesByNeedId(Long needId) {
+        List<Response> responses = responseRepository.findByNeedId(needId);
 
-    public List<Response> getResponsesByNeedId(Long needId) {
-        return responseRepository.findByNeedId(needId);
+        return responses.stream().map(response -> {
+            com.example.goodservice.vo.service.ResponseVO vo = new com.example.goodservice.vo.service.ResponseVO();
+            vo.setId(response.getResponseId());
+            vo.setNeedId(response.getNeedId());
+            vo.setServiceContent(response.getContent());
+            vo.setStatus(response.getStatus());
+
+            // 响应者信息（user）
+            if (response.getUserId() != null) {
+                userRepository.findById(response.getUserId()).ifPresent(u -> {
+                    vo.setResponderName(u.getRealName() != null ? u.getRealName() : u.getUsername());
+                    vo.setResponderIntro(u.getProfile());
+                });
+            }
+
+            // 需求标题
+            needRepository.findById(response.getNeedId()).ifPresent(n -> vo.setNeedTitle(n.getTitle()));
+
+            return vo;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     public List<Response> getMyResponses(Long userId) {

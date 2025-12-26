@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
     <el-card header="个人信息修改">
-      <!-- 只读信息 -->
+
       <el-descriptions border :column="1" style="margin-bottom: 20px">
         <el-descriptions-item label="用户名">{{ userStore.user?.username }}</el-descriptions-item>
         <el-descriptions-item label="用户ID">{{ userStore.user?.id }}</el-descriptions-item>
       </el-descriptions>
 
-      <!-- 可修改表单 -->
+
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="手机号码" prop="phone">
           <el-input v-model="form.phone" />
@@ -41,7 +41,7 @@ const form = reactive({
   password: ''
 })
 
-// 自定义校验：如果密码为空则不校验，否则走严格校验
+
 const checkPass = (rule: any, value: string, callback: any) => {
   if (!value) return callback()
   validatePassword(rule, value, callback)
@@ -66,12 +66,12 @@ const handleSave = () => {
             
             ElMessage.success('修改成功');
             
-            // 更新pinia中的用户信息
+
             if (userStore.user) {
               const updatedUser = { ...userStore.user };
               updatedUser.phone = form.phone;
               updatedUser.profile = form.profile;
-              userStore.login(updatedUser); // 使用login方法更新store
+              userStore.login(updatedUser); 
             }
           } catch (error) {
             ElMessage.error('修改失败');

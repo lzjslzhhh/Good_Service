@@ -67,15 +67,14 @@ const rules = {
 };
 
 const handleLogin = async () => {
-  // ... 表单校验通过 ...
-  // 模拟登录 API 返回
+
   loading.value = true;
   try {
     const res = await loginApi({
       username: form.username,
       password: form.password,
     });
-    // 假设后端返回 User 类型
+
     userStore.login(res);
     ElMessage.success("登录成功");
     if (res.role === "admin") router.push("/admin/stats");

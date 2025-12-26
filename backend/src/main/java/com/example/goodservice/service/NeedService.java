@@ -26,10 +26,15 @@ public class NeedService {
 
         // 手动筛选逻辑
         List<Need> filtered = allEntities.stream()
-                .filter(need -> serviceType == null || serviceType.isEmpty() || need.getServiceType().equals(serviceType))
-                .filter(need -> keyword == null || keyword.isEmpty() ||
-                        need.getTitle().contains(keyword) || need.getDescription().contains(keyword))
-                .collect(Collectors.toList());
+            .filter(need -> serviceType == null || serviceType.isEmpty() ||
+                (need.getServiceType() != null && need.getServiceType().equals(serviceType)))
+            .filter(need -> {
+                if (keyword == null || keyword.isEmpty()) return true;
+                String title = need.getTitle() == null ? "" : need.getTitle();
+                String desc = need.getDescription() == null ? "" : need.getDescription();
+                return title.contains(keyword) || desc.contains(keyword);
+            })
+            .collect(Collectors.toList());
 
         // 手动分页
         int start = (page - 1) * pageSize;

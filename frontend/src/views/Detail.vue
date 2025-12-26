@@ -71,7 +71,7 @@ onMounted(async () => {
       | "need"
       | "response";
     const res = await getNeedDetail(numericId, t);
-    // 后端返回 Map 对象，直接使用
+
     detailData.value = res || {};
   } catch (e: any) {
     ElMessage.error(e?.message || "加载详情失败");
@@ -80,7 +80,7 @@ onMounted(async () => {
   }
 });
 
-// 需求8: 确认操作需要有提示框
+
 const handleConfirm = () => {
   ElMessageBox.confirm("确定要响应/确认此条服务信息吗？", "操作确认", {
     confirmButtonText: "立即确认",

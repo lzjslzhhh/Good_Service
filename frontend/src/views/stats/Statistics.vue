@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
     <el-card>
-      <!-- 筛选栏 -->
       <div class="filter-container">
         <el-date-picker
           v-model="query.dateRange"
@@ -14,20 +13,15 @@
         />
         <el-input
           v-model="query.region"
-          placeholder="地域 (如: 北京)"
+          placeholder="地域 (如: 海淀区)"
           style="width: 150px; margin-right: 10px"
         />
         <el-button type="primary" @click="fetchStats">分析</el-button>
       </div>
-
-      <!-- 两个视图切换 -->
       <el-tabs v-model="activeView" style="margin-top: 20px">
-        <!-- 1. 趋势图 -->
         <el-tab-pane label="趋势分析 (图表)" name="chart">
           <div ref="chartRef" style="width: 100%; height: 400px"></div>
         </el-tab-pane>
-
-        <!-- 2. 明细列表 -->
         <el-tab-pane label="统计明细 (列表)" name="list">
           <el-table :data="statsData" border stripe>
             <el-table-column prop="month" label="月份" sortable />
@@ -60,7 +54,7 @@ const chartRef = ref<HTMLElement>();
 const statsData = ref<any[]>([]);
 let myChart: echarts.ECharts | null = null;
 
-// 默认近6个月
+
 const end = dayjs().format("YYYY-MM");
 const start = dayjs().subtract(5, "month").format("YYYY-MM");
 
@@ -69,7 +63,7 @@ const query = reactive({
   region: "",
 });
 
-// 调用后端统计接口
+
 const fetchStats = async () => {
   const params = {
     startMonth: query.dateRange?.[0] || start,
@@ -113,7 +107,7 @@ const renderChart = () => {
   });
 };
 
-// 监听 Tab 切换，重新渲染图表
+
 watch(activeView, () => {
   if (activeView.value === "chart") renderChart();
 });
